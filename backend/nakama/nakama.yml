@@ -1,0 +1,27 @@
+name: "local-nakama-go"
+
+logger:
+  level: "debug"
+
+database:
+  address:
+    - "postgres:5432"   # service name from compose
+  user: "nakama"
+  password: "nakama"
+  database: "nakama"
+
+console:
+  http_key: "defaultkey"  
+# Use KMS for sensitive information (encryption_key_kms_id) then use AWS KMS to retrieve 
+session:
+  token_expiry_sec: 86400  # 24 hours
+  refresh_token_expiry_sec: 604800  # 7 days
+  encryption_key: "defaultencryptionkey123456"  
+  refresh_encryption_key: "defaultrefreshkey123456" 
+socket:
+  server_key: "defaultkey"  
+  outgoing_queue_size: 16
+
+runtime:
+  path: "/nakama/data/modules"
+  http_key: "defaultkey" 

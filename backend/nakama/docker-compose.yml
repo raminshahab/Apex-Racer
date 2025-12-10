@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:14
+    container_name: nakama-postgres
+    environment:
+      POSTGRES_DB: nakama
+      POSTGRES_USER: nakama
+      POSTGRES_PASSWORD: nakama
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nakama -d nakama"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nakama:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nakama-go-server
+    container_name: nakama-go-server
+    environment:
+      - TESTING_MODE=${TESTING_MODE:-false} 
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "7350:7350"
+      - "7351:7351"
+    volumes:
+      - ./nakama.yml:/nakama/data/nakama.yml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7350/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  scheduler:
+    build:
+      context: ./scheduler
+      dockerfile: Dockerfile
+    container_name: nakama-scheduler
+    depends_on:
+      nakama:
+        condition: service_healthy
+    restart: unless-stopped
